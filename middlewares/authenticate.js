@@ -1,47 +1,54 @@
-// /middleware/authenticate.js
-
 const jwt = require("jsonwebtoken");
-const User = require("../model/userSchema");
+const Admin = require("../model/adminSchema");
+const Recipe = require("../model/recipeSchema"); // assuming you have a Recipe model
 
+// Authentication middleware
 const authenticate = (req, res, next) => {
   const authHeader = req.header("Authorization");
-	// if token is not send, 
   if (!authHeader) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Access denied. No token provided." });
+    return res.status(401).json({ success: false, message: "Access denied. No token provided." });
   }
-	// Token is normally send as Bearer (token), replace the Bearer and only store
-	// the token value
+
   const token = authHeader.replace("Bearer ", "");
-  if (!token) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Access denied. No token provided." });
-  }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.admin = decoded; // send the user data payload in req.user
+    req.user = decoded;
     next();
   } catch (err) {
     res.status(400).json({ success: false, message: "Invalid token." });
   }
 };
 
-const authAdmin =  (permissions)=>{
-  return async(req,res,next)=>{
-    try{
-      const roles = await User.find(role)
-      console.log(roles);
-        if(permissions.includes(roles)){
-          next()
-        }else{
-            res.status(401).json({success:false,message:"You don't have permssion in this route"})
-        }
-    }catch(err){
-      res.status(400).json({ success: false, message: err });
-    }
-  }
-}
+// Authorization middleware for admin access
+const authAdmin = (permissions) => {
+  return async (req, res, next) => {
+    try {
+      const admin = await getAdmin(req.user.id);
+      if (!admin) {
+        return res.status(403).json({ success: false, message: "You don't have permission to access this route." });
+      }
 
-module.exports = authenticate,authAdmin;
+      if (hasPermission(admin.role, permissions)) {
+        return next();
+      }
+
+    
+    } catch (err) {
+      res.status(500).json({ success: false, message: "Internal server error." });
+    }
+  };
+};
+
+const getAdmin = async (id) => {
+  try {
+    return await Admin.findById(id);
+  } catch (err) {
+    throw err;
+  }
+};
+
+const hasPermission = (role, permissions) => {
+  return permissions.includes(role);
+};
+
+module.exports = {authenticate,authAdmin};
