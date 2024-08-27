@@ -109,7 +109,7 @@ const filterRecipes = async (req, res) => {
 
         // Convert all category values to lowercase
         Category = Category.map(cat => cat.toLowerCase());
-
+        
         // MongoDB query for case-insensitive search
         const recipes = await Recipe.find({
             Category: { $in: Category.map(cat => new RegExp('^' + cat + '$', 'i')) }
@@ -124,12 +124,6 @@ const filterRecipes = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
-
-
-
-
-
-
 
 module.exports = {
     createRecipe,
