@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const recipeSchema = new mongoose.Schema(
   {
     recipeTitle: {
@@ -30,9 +31,12 @@ const recipeSchema = new mongoose.Schema(
       },
     ],
     Category: {
-        type:[String]
-
-    }
+      type: [String],
+    },
+    Image: {
+      type: String, 
+      defaul: "",
+    },
   },
   { timestamps: true }
 );
