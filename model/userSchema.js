@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "admin",
     },
+    reviews: [{
+      type: mongoose.Schema.Types.ObjectId,
+      default:0 ,
+      ref: 'Reviews' // Reference to the Review model
+    }],
     otp: { type: String, default: null },
     otpExpires: { type: Date, default: null },
     isVerified: { type: Boolean, default: false },
