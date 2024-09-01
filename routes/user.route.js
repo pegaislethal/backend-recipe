@@ -1,9 +1,10 @@
 const express = require("express");
-const {createUser,loginUser,verifyOTPUser,profileEdit} = require('../controller/user.controller');
+const {createUser,loginUser,verifyOTPUser,profileEdit, currentUser} = require('../controller/user.controller');
 const {authenticate} = require('../middlewares/authenticate')
 
 const app = express.Router();
 
+app.get('/currentUser',authenticate,currentUser)
 app.post('/signUp',createUser);
 app.post('/login',loginUser)
 app.post("/verifyOtp",verifyOTPUser );

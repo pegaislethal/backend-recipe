@@ -15,7 +15,7 @@ const adminSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: "user",
+      default: "admin",
     },
     otp: { type: String, default: null },
     otpExpires: { type: Date, default: null },

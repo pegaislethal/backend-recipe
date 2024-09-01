@@ -19,6 +19,8 @@ const createRecipe = async (req, res) => {
     Category,
   } = req.body;
 
+  console.log(recipeTitle);
+
   try {
     let imageUrl = "";
 
@@ -42,6 +44,7 @@ const createRecipe = async (req, res) => {
       recipeDesc,
       preparationTime,
       Calorie,
+      Chef: req.user.username,
       Ingredients,
       Directions,
       Category,
@@ -88,6 +91,7 @@ const updateRecipe = async (req, res) => {
     recipeDesc,
     preparationTime,
     Calorie,
+    Chef,
     Ingredients,
     Directions,
     Category,
@@ -117,6 +121,7 @@ const updateRecipe = async (req, res) => {
         recipeDesc,
         preparationTime,
         Calorie,
+        Chef,
         Ingredients,
         Directions,
         Category,

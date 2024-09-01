@@ -1,6 +1,5 @@
-// validations/recipesValidation-zod.js
-
 const { z } = require("zod");
+
 const recipeSchema = z.object({
   recipeTitle: z
     .string()
@@ -20,6 +19,10 @@ const recipeSchema = z.object({
   Calorie: z
     .number()
     .positive({ message: "Calorie must be a positive number" }),
+  Chef: z
+    .string()
+    .min(2, { message: "Chef name must be at least 2 characters long" })
+    .max(50, { message: "Chef name must be at most 50 characters long" }),
   Ingredients: z.array(
     z
       .string()

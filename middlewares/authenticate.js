@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const Admin = require("../model/adminSchema");
-const Recipe = require("../model/recipeSchema"); // assuming you have a Recipe model
 
 // Authentication middleware
 const authenticate = (req, res, next) => {
@@ -23,32 +22,31 @@ const authenticate = (req, res, next) => {
 const authAdmin = (permissions) => {
   return async (req, res, next) => {
     try {
-      const admin = await getAdmin(req.user.id);
+      if (!req.user || !req.user.id) {
+        
+        return res.status(401).json({ success: false, message: "Unauthorized access." });
+      }
+
+      const admin = await Admin.findById(req.user.id);
       if (!admin) {
-        return res.status(403).json({ success: false, message: "You don't have permission to access this route." });
+        return res.status(403).json({ success: false, message: "Admin not found." });
       }
 
       if (hasPermission(admin.role, permissions)) {
-        return next();
+        return next();  // Proceed if permission check passes
+      } else {
+        return res.status(403).json({ success: false, message: "Insufficient privileges." });
       }
 
-    
     } catch (err) {
-      res.status(500).json({ success: false, message: "Internal server error." });
+      console.error("Error in authAdmin middleware:", err); // Log the error for debugging
+      return res.status(500).json({ success: false, message: "Internal server error." });
     }
   };
 };
 
-const getAdmin = async (id) => {
-  try {
-    return await Admin.findById(id);
-  } catch (err) {
-    throw err;
-  }
+const hasPermission = (adminRole, requiredPermissions) => {
+  return requiredPermissions.includes(adminRole);
 };
 
-const hasPermission = (role, permissions) => {
-  return permissions.includes(role);
-};
-
-module.exports = {authenticate,authAdmin};
+module.exports = { authenticate, authAdmin };

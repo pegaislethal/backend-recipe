@@ -18,6 +18,10 @@
         type: Number,
         required: true,
       },
+      Chef: {
+        type: String,
+        required: true,
+      },
       Ingredients: [
         {
           type: String,

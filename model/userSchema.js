@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: "admin",
+      default: "user",
     },
     reviews: [{
       type: mongoose.Schema.Types.ObjectId,

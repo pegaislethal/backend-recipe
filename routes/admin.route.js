@@ -1,11 +1,12 @@
 const express = require("express");
 const { createAdmin, loginAdmin, verifyOTPAdmin ,adminPage} = require('../controller/admin.controller')
-const {authAdmin} = require('../middlewares/authenticate')
+const {authAdmin,authenticate} = require('../middlewares/authenticate');
+
 
 
 const app = express.Router();
 
-app.get('/',authAdmin('admin'),adminPage)
+app.get('/',authenticate,authAdmin('admin'),adminPage)
 app.post('/signUp',createAdmin);
 app.post('/login',loginAdmin)
 app.post("/verifyOtp",verifyOTPAdmin );
