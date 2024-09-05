@@ -1,13 +1,14 @@
 const express = require("express");
-const {createUser,loginUser,verifyOTPUser,profileEdit, currentUser} = require('../controller/user.controller');
-const {authenticate} = require('../middlewares/authenticate')
+const { createUser, loginUser, profileEdit, verifyOTPUser } = require('../controller/user.controller');
+const { authenticate } = require('../middlewares/authenticate');
+const currentLogin = require('../middlewares/currentLogin'); // Ensure this matches the actual file name
 
 const app = express.Router();
 
-app.get('/currentUser',authenticate,currentUser)
-app.post('/signUp',createUser);
-app.post('/login',loginUser)
-app.post("/verifyOtp",verifyOTPUser );
-app.post('/edit/:id',authenticate, profileEdit)
+app.get('/currentUser', currentLogin);
+app.post('/signUp', createUser);
+app.post('/login', loginUser);
+app.post("/verifyOtp", verifyOTPUser);
+app.post('/edit/:id', authenticate, profileEdit);
 
 module.exports = app;

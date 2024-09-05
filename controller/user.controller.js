@@ -3,14 +3,16 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../model/userSchema");
+const Admin = require('../model/adminSchema');
 const { sendOTP } = require("../utils/otp.utils");
 const { log } = require("console");
+const { StatusCodes } = require("http-status-codes");
 
 const app = express();
 app.use(express.json());
 
 const createUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password,role } = req.body;
   const otpGenerate = crypto.randomInt(100000, 999999).toString();
 
   try {
@@ -25,6 +27,7 @@ const createUser = async (req, res) => {
     const newUser = new User({
       name,
       email,
+      role,
       password: hashedPassword,
       otp: otpGenerate,
       otpExpires,
@@ -46,7 +49,7 @@ const createUser = async (req, res) => {
 };
 
 const verifyOTPUser = async (req, res) => {
-  const { email, otp } = req.body;
+  const { email, otp,role } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -91,21 +94,17 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
+      return res.status(400).json({ success: false, message: "Invalid password" });
     }
 
     // Ensure user is verified
     if (!user.isVerified) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email not verified" });
+      return res.status(400).json({ success: false, message: "Email not verified" });
     }
 
-    // Create JWT token
+    // Create JWT token, including the role
     const token = jwt.sign(
-      { id: user._id, email: user.email, username: user.name },
+      { id: user._id, email: user.email, username: user.name, role: user.role }, // Include role
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -116,10 +115,11 @@ const loginUser = async (req, res) => {
   }
 };
 
+
 const profileEdit = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log(id);
+  
 
     // Find the user by ID
     const user = await User.findById(id);
@@ -150,16 +150,6 @@ const profileEdit = async (req, res) => {
   }
 };
 
-const currentUser = async (req, res) => {
-  try {
-    const user = req.user;
-    console.log(user)
-    if (user) {
-      res.status(200).json({ success: true, message: user });
-    }
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
 
-module.exports = { createUser, loginUser, verifyOTPUser, profileEdit,currentUser };
+
+module.exports = { createUser, loginUser, verifyOTPUser,profileEdit };

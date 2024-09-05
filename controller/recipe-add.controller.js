@@ -19,7 +19,7 @@ const createRecipe = async (req, res) => {
     Category,
   } = req.body;
 
-  console.log(recipeTitle);
+  // console.log(recipeTitle);
 
   try {
     let imageUrl = "";

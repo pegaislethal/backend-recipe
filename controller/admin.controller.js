@@ -33,24 +33,23 @@ const createAdmin = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role, // Save the role here
+      role,
       otp: otpGenerate,
       otpExpires,
     });
 
- 
-
     // Send OTP to admin's email
-    await sendOTP(email, otpGenerate, otpExpires);
-    await newAdmin.save();
-
-    res
-      .status(201)
-      .json({
+    const otpSent = await sendOTP(email, otpGenerate, otpExpires);
+    if (otpSent) {
+      await newAdmin.save();
+      res.status(201).json({
         message:
           "Admin created successfully. Please verify your email with the OTP sent.",
         newAdmin,
       });
+    } else {
+      res.status(500).json({ message: "Error sending OTP. Please try again." });
+    }
   } catch (error) {
     res.status(500).json({ message: "Error creating new admin", error });
   }
@@ -61,20 +60,24 @@ const verifyOTPAdmin = async (req, res) => {
 
   try {
     const admin = await Admin.findOne({ email });
-
     if (!admin) {
       return res.status(404).json({
         success: false,
-        message: "Admin not found",
+        message: "Admin with this email not found",
       });
     }
 
-    if (admin.otp != otp) {
-      console.log("otp", otp);
-      console.log("user.otp", user.otp);
+    if (admin.otp !== otp) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired OTP",
+        message: "Invalid OTP",
+      });
+    }
+
+    if (Date.now() > admin.otpExpires) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired",
       });
     }
 
@@ -96,6 +99,7 @@ const verifyOTPAdmin = async (req, res) => {
   }
 };
 
+
 const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -116,7 +120,7 @@ const loginAdmin = async (req, res) => {
 
     // Create JWT token
     const token = jwt.sign(
-      { id: admin._id, email: admin.email, username: admin.name },
+      { id: admin._id, email: admin.email, username: admin.name,role :admin.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
