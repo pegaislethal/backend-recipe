@@ -1,7 +1,7 @@
 const express = require("express");
 const Recipe = require("../model/recipeSchema"); // Use singular 'Recipe' for the model
 const Review = require("../model/reviewSchema");
-const { uploadOnCloundinary } = require("../utils/cloudinary.util"); // Cloudinary upload service
+const { uploadOnCloudinary } = require("../utils/cloudinary.util"); // Cloudinary upload service
 const fs = require("fs");
 const path = require("path");
 const app = express();
@@ -13,21 +13,24 @@ const createRecipe = async (req, res) => {
     recipeTitle,
     recipeDesc,
     preparationTime,
+    Chef,
     Calorie,
     Ingredients,
     Directions,
     Category,
+    Image
   } = req.body;
 
-  // console.log(recipeTitle);
+
 
   try {
     let imageUrl = "";
 
     // Check if there's a file to upload
     if (req.file) {
-      const uploadResponse = await uploadOnCloundinary(req.file.path);
-      console.log(req.file.path);
+      const uploadResponse = await uploadOnCloudinary(req.file.path);
+      // console.log(uploadResponse)
+      // console.log(req.file.path);
       if (uploadResponse) {
         imageUrl = uploadResponse.url;
         // Delete the locally saved file after uploading to Cloudinary
@@ -48,9 +51,9 @@ const createRecipe = async (req, res) => {
       Ingredients,
       Directions,
       Category,
-      Image: imageUrl, // Save the Cloudinary image URL in the database
+      Image: imageUrl, 
     });
-
+    console.log(newRecipe);
     await newRecipe.save();
     res.status(201).json({ message: "Recipe added successfully", newRecipe });
   } catch (error) {
@@ -68,7 +71,7 @@ const getRecipes = async (req, res) => {
   }
 };
 
-// Get a recipe by ID
+
 const getRecipeById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -83,7 +86,7 @@ const getRecipeById = async (req, res) => {
   }
 };
 
-// Update a recipe
+
 const updateRecipe = async (req, res) => {
   const { id } = req.params;
   const {
@@ -125,7 +128,7 @@ const updateRecipe = async (req, res) => {
         Ingredients,
         Directions,
         Category,
-        image: imageUrl || undefined,
+        Image: imageUrl ,
       },
       { new: true }
     );
