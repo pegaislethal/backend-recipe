@@ -44,7 +44,7 @@
       },
       Image: {
         type: String, 
-        defaul: "",
+        default: "",
       },
     },
     { timestamps: true }
