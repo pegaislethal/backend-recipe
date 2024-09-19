@@ -199,20 +199,23 @@ const filterRecipes = async (req, res) => {
 };
 
 const postReview = async (req, res) => {
-  const { recipeId, rating, reviewText } = req.body;
-  const userId = req.user.id;
+  const { id: recipeId } = req.params; // Correct extraction of recipeId from params
+  const { rating, reviewText } = req.body;
+  const userId = req.user.id; // Assuming you have user authentication
+
+  // Validate rating
   if (rating < 1 || rating > 5) {
     return res.status(400).json({ message: "Rating must be between 1 and 5" });
   }
 
   try {
     // Check if the user has already reviewed this recipe
-    const existingReview = await Review.findOne({ recipeId, userId });
-    if (existingReview) {
-      return res
-        .status(400)
-        .json({ message: "You have already reviewed this recipe" });
-    }
+    // const existingReview = await Review.findOne({ recipeId, userId });
+    // if (existingReview) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "You have already reviewed this recipe" });
+    // }
 
     // Create a new review
     const newReview = new Review({
@@ -243,22 +246,35 @@ const postReview = async (req, res) => {
 };
 
 const getReviews = async (req, res) => {
-  const { recipeId } = req.params; // Get the recipeId from the request parameter
+  const { id } = req.params; // Get the recipeId from the request parameter
   try {
-    // Find the recipe by its ID
-    const recipe = await Recipe.findById(recipeId);
-
+    const recipe = await Recipe.findById(id).populate("reviews"); // Populate reviews
     if (!recipe) {
       return res.status(404).json({ message: "Recipe not found" });
     }
-    // Check if the recipe has reviews and send them back
-    const reviews = recipe.reviews; // Access the reviews directly
-    res.status(200).json(reviews);
+    // Send back the reviews
+    res.status(200).json(recipe.reviews);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error fetching reviews", error });
   }
 };
+
+const deleteReviews = async (req, res) => {
+  const { id } = req.params; // Get the review ID from request parameters
+  try {
+    const deletedReview = await Review.findByIdAndDelete(id); // Delete the review by ID
+    if (deletedReview) {
+      res.status(200).json({ message: "Review deleted successfully", deletedReview });
+    } else {
+      res.status(404).json({ message: "Review not found" }); // Review not found
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting review", error }); // Handle any server errors
+  }
+};
+
+
 
 module.exports = {
   createRecipe,
@@ -269,4 +285,5 @@ module.exports = {
   filterRecipes,
   postReview,
   getReviews,
+  deleteReviews
 };
