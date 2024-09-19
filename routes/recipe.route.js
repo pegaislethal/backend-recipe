@@ -6,7 +6,8 @@ const {
   updateRecipe,
   deleteRecipe,
   filterRecipes,
-  postReview
+  postReview,
+  getReviews
 } = require("../controller/recipe-add.controller");
 const upload = require('../middlewares/multer');
 
@@ -21,6 +22,7 @@ app.get('/:id', getRecipeById);
 app.patch('/:id', authenticate, authAdmin('admin'), upload.single('Image') ,updateRecipe);
 app.delete('/:id', authenticate, authAdmin('admin'), deleteRecipe);
 app.post('/reviews/:id',authenticate,postReview);
+app.get('/reviews/:id',getReviews)
 
 
 module.exports = app;

@@ -7,8 +7,11 @@ const app = express();
 
 connectDB();
 
-// Middleware
-app.use(cors({ origin: "http://localhost:5173" })); // Enable CORS for localhost:5173
+
+app.use(cors({
+  origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true, // Allows cookies to be sent
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", mainRouter);

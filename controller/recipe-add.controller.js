@@ -15,13 +15,12 @@ const createRecipe = async (req, res) => {
     preparationTime,
     Chef,
     Calorie,
+    Reviews,
     Ingredients,
     Directions,
     Category,
-    Image
+    Image,
   } = req.body;
-
-
 
   try {
     let imageUrl = "";
@@ -47,11 +46,12 @@ const createRecipe = async (req, res) => {
       recipeDesc,
       preparationTime,
       Calorie,
+      reviews: req.user.reviews,
       Chef: req.user.username,
       Ingredients,
       Directions,
       Category,
-      Image: imageUrl, 
+      Image: imageUrl,
     });
     console.log(newRecipe);
     await newRecipe.save();
@@ -71,7 +71,6 @@ const getRecipes = async (req, res) => {
   }
 };
 
-
 const getRecipeById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -85,7 +84,6 @@ const getRecipeById = async (req, res) => {
     res.status(500).json({ message: "Error fetching recipe", error });
   }
 };
-
 
 const updateRecipe = async (req, res) => {
   const { id } = req.params;
@@ -128,7 +126,7 @@ const updateRecipe = async (req, res) => {
         Ingredients,
         Directions,
         Category,
-        Image: imageUrl ,
+        Image: imageUrl,
       },
       { new: true }
     );
@@ -202,9 +200,20 @@ const filterRecipes = async (req, res) => {
 
 const postReview = async (req, res) => {
   const { recipeId, rating, reviewText } = req.body;
-  const userId = req.user.id; // Assuming req.user contains the authenticated user's info
+  const userId = req.user.id;
+  if (rating < 1 || rating > 5) {
+    return res.status(400).json({ message: "Rating must be between 1 and 5" });
+  }
 
   try {
+    // Check if the user has already reviewed this recipe
+    const existingReview = await Review.findOne({ recipeId, userId });
+    if (existingReview) {
+      return res
+        .status(400)
+        .json({ message: "You have already reviewed this recipe" });
+    }
+
     // Create a new review
     const newReview = new Review({
       recipeId,
@@ -220,14 +229,34 @@ const postReview = async (req, res) => {
       recipeId,
       { $push: { reviews: newReview._id } },
       { new: true }
-    ).populate("reviews"); // Populate the reviews
+    ).populate("reviews");
 
     res
       .status(201)
       .json({ message: "Review added successfully", updatedRecipe });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error posting review", error });
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Error posting review", error: error.message });
+  }
+};
+
+const getReviews = async (req, res) => {
+  const { recipeId } = req.params; // Get the recipeId from the request parameter
+  try {
+    // Find the recipe by its ID
+    const recipe = await Recipe.findById(recipeId);
+
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+    // Check if the recipe has reviews and send them back
+    const reviews = recipe.reviews; // Access the reviews directly
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching reviews", error });
   }
 };
 
@@ -239,4 +268,5 @@ module.exports = {
   deleteRecipe,
   filterRecipes,
   postReview,
+  getReviews,
 };
