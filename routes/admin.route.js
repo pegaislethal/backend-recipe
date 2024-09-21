@@ -1,5 +1,5 @@
 const express = require("express");
-const { createAdmin, loginAdmin, verifyOTPAdmin ,adminPage} = require('../controller/admin.controller')
+const { createAdmin, loginAdmin ,adminPage} = require('../controller/admin.controller')
 
 const {authAdmin,authenticate} = require('../middlewares/authenticate');
 
@@ -11,5 +11,5 @@ app.get('/',authenticate,authAdmin('admin'),adminPage)
 
 app.post('/signUp',createAdmin);
 app.post('/login',loginAdmin)
-app.post("/verifyOtp",verifyOTPAdmin );
+// app.post("/verifyOtp",verifyOTPAdmin );
 module.exports = app;

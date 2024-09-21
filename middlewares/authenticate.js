@@ -4,6 +4,7 @@ const Admin = require("../model/adminSchema");
 // Authentication middleware
 const authenticate = (req, res, next) => {
   const authHeader = req.header("Authorization");
+  console.log(authHeader)
   if (!authHeader) {
     return res.status(401).json({ success: false, message: "Access denied. No token provided." });
   }
